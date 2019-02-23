@@ -6,7 +6,6 @@ Created on Fri Jan 11 13:12:30 2019
 """
 #creating the board
 import random
-#woo
 import copy
 """
 what's needed 
@@ -91,58 +90,35 @@ class Game:
                 #print(self.flipped[x])
     def CheckCoordinateValidity(self,startX,startY,finishX):#checks if desired move is valid
         try:
-            """
-            coordinates[0] = start x
-            coordinates[1] = start y
-            coordinates[2] = finish x 
-            coordinates[3] = finish y -------REMOVE
-            """
             #checking the first coordinate
-            if 0 <= startX < 10 and 0 <= finishX < 10:
-                if 0 <= startY < len(self.flipped[startX]):
-                    return True
-                elif len(self.flipped[finishX]) == 0:
-                    return True
-                else: 
-                    return False
-            else:
-                return False
+            return (0 <= startX < 10 and 0 <= finishX < 10) and (0 <= startY < len(self.flipped[startX]))
         except:
             print("INVALID -- COORDINATE VALIDITY")
+    #checks if start card is one less than target card
+    def OneLessThan(self, startCard, targetCard):
+        return startCard == targetCard-1
+    def DecrementingByOne(self, currentStack):
+        for x in range(1,len(self.currentStack),1):
+            if self.currentStack[x] == self.currentStack[x-1]-1:
+                pass
+            else:
+                return False
     def CheckMoveValidity(self,startX,startY,finishX): #checks if the move is valid
         try:
-            """
-            coordinates[0] = start x
-            coordinates[1] = start y
-            coordinates[2] = finish x 
-            coordinates[3] = finish y -------REMOVE
-            """
             if len(self.flipped[finishX])==0:
                 return True
             #check if the card at the target position is at the bottom of its stack
             elif len(self.flipped[finishX])>0:
                 #check if the card at the current position is less than the card at the target position
-                if self.flipped[startX][startY] == self.flipped[finishX][-1]-1:
-                    #check if all the cards that follow the card is one less than it
-                    self.currentStack=[]
+                if self.OneLessThan(self.flipped[startX][startY],self.flipped[finishX][-1]):
+                    #check if start card is on bottom
                     if startY == len(self.flipped[startX])-1:
                         return True
-                    else:
-                        for x in range(startY,len(self.flipped[startX]),1):
-                            self.currentStack.append(self.flipped[startX][x])
-                        #print(self.currentStack)
-                        for x in range(1,len(self.currentStack),1):
-                            #print("here " + str(x) + " " + str(self.currentStack))
-                            if self.currentStack[x] == self.currentStack[x-1]-1:
-                                #print("good")
-                                pass
-                            else:
-                                return False
+                    self.currentStack=self.flipped[startX][startY:]
+                    print(self.currentStack)
+                    if self.DecrementingByOne(self.currentStack):
                         return True
-                else:
-                    return False
-            else:
-                return False
+            return False
         except:
             print("INVALID -- MOVE VALIDITY")
     def MoveStack(self,startX,startY,finishX):#moves a card or stack
@@ -230,8 +206,11 @@ class Game:
             startX=self.possibleMoves[x][0]
             startY=self.possibleMoves[x][1]
             finishX=self.possibleMoves[x][2]
-            if self.CheckMoveValidity(startX,startY,finishX) and self.CheckCoordinateValidity(startX,startY,finishX):
-                self.possibleValidMoves.append(self.possibleMoves[x])    
+            if self.ValidMove(startX, startY, finishX):
+                self.possibleValidMoves.append(self.possibleMoves[x])  
+
+    def ValidMove(self, startX, startY, finishX):
+        return self.CheckMoveValidity(startX,startY,finishX) and self.CheckCoordinateValidity(startX,startY,finishX)
 
 g=Game()
 

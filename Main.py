@@ -6,8 +6,6 @@ Created on Fri Jan 11 13:12:30 2019
 """
 #creating the board
 import random
-
-import numpy as np
 import copy
 import time
 """
@@ -36,7 +34,7 @@ class Game:
         self.deck=list(range(1,14))
         self.deck= self.deck*8
         self.unflipped=[[] for i in range(10)]
-        np.random.shuffle(self.deck)
+        random.shuffle(self.deck)
         for i in range(len(self.unflipped)):
             if i<4:
                 self.unflipped[i]=(self.deck[0:6])
@@ -272,6 +270,13 @@ def score(game):
 def percentages(part,whole):
     return part/whole
 
+def list_mean(n):
+    
+    summing = float(sum(n))
+    count = float(len(n))
+    if n == []:
+        return False
+    return float(summing/count)  
 highestDepth = 5
 gamesPlayed= 5
 for y in range(1,highestDepth+1,1):
@@ -376,23 +381,23 @@ for y in range(1,highestDepth+1,1):
 
     averageTimesPerGame=[]  
     for x in range(len(gameMoveTimes)):
-        averageTimesPerGame.append(np.mean(gameMoveTimes[x]))
+        averageTimesPerGame.append(list_mean(gameMoveTimes[x]))
     averagStacksPerGame=[]  
     for x in range(len(gameCompletedStack)):
-        averagStacksPerGame.append(np.mean(gameCompletedStack[x]))
+        averagStacksPerGame.append(list_mean(gameCompletedStack[x]))
     averagMovesPerGame=[]  
     for x in range(len(gameMovesMade)):
-        averagMovesPerGame.append(np.mean(gameMovesMade[x]))        
+        averagMovesPerGame.append(list_mean(gameMovesMade[x]))        
     averageBoardsPerGame=[]  
     for x in range(len(gameBoardsCompared)):
-        averageBoardsPerGame.append(np.mean(gameBoardsCompared[x])) 
+        averageBoardsPerGame.append(list_mean(gameBoardsCompared[x])) 
         
     print("Games played: " + str(gamesPlayed))
-    print("Average time per game: " + str(np.mean(gameElapsedTime)))
-    print("Average time per move per game: " + str(np.mean(averageTimesPerGame)))
-    print("Average stacks completed per game: " + str(np.mean(averagStacksPerGame)))
-    print("Average amount of boards compared: " + str(np.mean(averageBoardsPerGame)))
-    print("Average moves per game: " + str(np.mean(averagMovesPerGame)))
+    print("Average time per game: " + str(list_mean(gameElapsedTime)))
+    print("Average time per move per game: " + str(list_mean(averageTimesPerGame)))
+    print("Average stacks completed per game: " + str(list_mean(averagStacksPerGame)))
+    print("Average amount of boards compared: " + str(list_mean(averageBoardsPerGame)))
+    print("Average moves per game: " + str(list_mean(averagMovesPerGame)))
     print("Depth: " + str(depth))
     print("Games won: " + str(wins))
     print("Games lost: " + str(losses))
