@@ -6,6 +6,7 @@ Created on Fri Jan 11 13:12:30 2019
 """
 #creating the board
 import random
+
 import copy
 """
 what's needed 
