@@ -6,8 +6,6 @@ Created on Fri Jan 11 13:12:30 2019
 """
 #creating the board
 import random
-
-import numpy as np
 import copy
 """
 what's needed 
@@ -35,7 +33,7 @@ class Game:
         self.deck=list(range(1,14))
         self.deck= self.deck*8
         self.unflipped=[[] for i in range(10)]
-        np.random.shuffle(self.deck)
+        random.shuffle(self.deck)
         for i in range(len(self.unflipped)):
             if i<4:
                 self.unflipped[i]=(self.deck[0:6])
