@@ -42,24 +42,27 @@ class Game:
             else:
                 self.unflipped[i]=(self.deck[0:5])
                 del self.deck[0:5]
-        self.foundation=[]
-        for x in range(len(self.deck)):
-            self.foundation.append(self.deck[x])
+        self.foundation=self.deck
         self.stock=[]
         self.lines=['-','-','-','-','-','-','-','-','-','-']
         self.flipped=[[] for i in range(10)]
-        self.gameList=[]
         self.InitialFlip()
+
     def InitialFlip(self): # does the intial flip
         for x in range(len(self.flipped)):
             self.flipped[x]=[self.unflipped[x][-1]]
             del self.unflipped[x][-1]
+
     def DisplayBoard(self):#displays the board vertically
         try:
             print("Stock --> " + str(len(self.foundation)//10))
             print()
             print ('\t'.join(str(x) for x in self.lines))
             print ('\t'.join(str(x) for x in self.stock))
+            print()
+            print ('\t'.join(str(len(x)) for x in self.unflipped))
+            print()
+            print ('\t'.join(str(x) for x in self.lines))
             print()
             upper = len(max(self.flipped, key=len)) # find longest sublist
             for i in range(upper):
@@ -75,11 +78,13 @@ class Game:
             print()            
         except:
             print("INVALID -- DISPLAY BOARD")
+
     #this function is really important, as it has to happen after every single move
     def FlipCard(self): #checks if a card needs to be flipped and if there is a card available to be flipped
         for i in range(len(self.flipped)):
             if not self.flipped[i] and self.unflipped[i]:
                 self.flipped[i].append(self.unflipped[i].pop(0))
+
     def DealFoundation(self): #deals the foundation
         if not self.foundation:
             print()
@@ -89,86 +94,85 @@ class Game:
             for x in range(len(self.flipped)):
                 self.flipped[x].append(self.foundation[0])
                 del self.foundation[0]
+
     def CheckCoordinateValidity(self,startX,startY,finishX):#checks if desired move is valid
         try:
             #checking the first coordinate
-            if 0 <= startX < 10 and 0 <= finishX < 10:
-                if 0 <= startY < len(self.flipped[startX]):
-                    return True
-                elif len(self.flipped[finishX]) == 0:
-                    return True
-                else: 
-                    return False
-            else:
-                return False
+            return (0 <= startX < 10 and 0 <= finishX < 10) and (0 <= startY < len(self.flipped[startX]))
         except:
             print("INVALID -- COORDINATE VALIDITY")
+
     def CheckMoveValidity(self,startX,startY,finishX): #checks if the move is valid
         try:
-            """
-            coordinates[0] = start x
-            coordinates[1] = start y
-            coordinates[2] = finish x 
-            coordinates[3] = finish y -------REMOVE
-            """
             if len(self.flipped[finishX])==0:
                 return True
             #check if the card at the target position is at the bottom of its stack
             elif len(self.flipped[finishX])>0:
                 #check if the card at the current position is less than the card at the target position
-                if self.flipped[startX][startY] == self.flipped[finishX][-1]-1:
-                    #check if all the cards that follow the card is one less than it
-                    self.currentStack=[]
+                if self.OneLessThan(self.flipped[startX][startY],self.flipped[finishX][-1]):
+                    #check if start card is on bottom
                     if startY == len(self.flipped[startX])-1:
                         return True
-                    else:
-                        for x in range(startY,len(self.flipped[startX]),1):
-                            self.currentStack.append(self.flipped[startX][x])
-                        #print(self.currentStack)
-                        for x in range(1,len(self.currentStack),1):
-                            #print("here " + str(x) + " " + str(self.currentStack))
-                            if self.currentStack[x] == self.currentStack[x-1]-1:
-                                #print("good")
-                                pass
-                            else:
-                                return False
+                    self.currentStack=self.flipped[startX][startY:]
+                    if self.DecrementingByOne(self.currentStack):
                         return True
-                else:
-                    return False
-            else:
-                return False
+            return False
         except:
             print("INVALID -- MOVE VALIDITY")
-    def MoveStack(self,startX,startY,finishX):#moves a card or stack
-        try:
-            if startX == -1 and startY == -1 and finishX == -1:
-                self.DealFoundation()
+
+    #checks if start card is one less than target card
+    def OneLessThan(self, startCard, targetCard):
+        return startCard == targetCard-1
+
+    def DecrementingByOne(self, currentStack):
+        for x in range(1,len(self.currentStack),1):
+            if self.currentStack[x] == self.currentStack[x-1]-1:
+                pass
             else:
-                #get the stack
-                self.currentStack=[]
-                if startY == len(self.flipped[startX])-1:
-                    self.currentStack.append(self.flipped[startX][startY])
-                    del self.flipped[startX][startY]
-                else:
-                    for x in range(startY,len(self.flipped[startX]),1):
-                        self.currentStack.append(self.flipped[startX][x])
-                    del self.flipped[startX][startY:]
-                #move the stack to the new stack
-                #checks if the target list is empty
-                if len(self.currentStack) == 1:
-                    self.flipped[finishX].append(self.currentStack[0])
-                else:
-                    for x in range(len(self.currentStack)):
-                        self.flipped[finishX].append(self.currentStack[x])
-                self.MoveToStock()
-        except:
-            pass
-            #print("INVALID -- MOVE STACK")
+                return False
+        return True
+
+    def MoveStack(self,startX,startY,finishX):#moves a card or stack
+    #try:
+        if startX == -1 and startY == -1 and finishX == -1:
+            self.DealFoundation()
+        #get the stack and remove it from start
+        else:
+            self.currentStack=[]
+            self.GetStackOfCards(startX,startY,finishX)
+            #move the stack to the new stack
+            self.MoveToBottomOfTargetPile(self.currentStack,finishX)
+        self.MoveToStock()
+    #except Exception as e:
+       # print("INVALID -- MOVE STACK")
+       # print(str(e))
+
+
+    def GetStackOfCards(self,startX,startY,finishX):
+        try:
+            if startY == len(self.flipped[startX])-1:
+                self.currentStack.append(self.flipped[startX][startY])
+                del self.flipped[startX][startY]
+            else:
+                self.currentStack=self.flipped[startX][startY:]
+                del self.flipped[startX][startY:]
+        except Exception as e:
+            print("INVALID -- GET STACK OF CARDS")
+            print(str(e))
+            print(startX)
+            print(startY)
+            print(finishX)
+
+    def MoveToBottomOfTargetPile(self, currentStack,finishX):
+        for x in range(len(self.currentStack)):
+            self.flipped[finishX].append(self.currentStack[x])    
+
     def StackCompleted(self,compare):
         for i in range(len(compare) - len(self.comparer) + 1):
             if self.comparer == compare[i:i+len(self.comparer)]: 
                 return True
         return False
+
     def MoveToStock(self):
         try:
             self.stackCompleted=False
@@ -183,52 +187,43 @@ class Game:
                 self.stock.append("X")
                 #remove the stack from flipped
                 last= len(self.flipped[self.completedRow]) - 1 - self.flipped[self.completedRow][::-1].index(13)
-                for x in range(last-1,len(self.flipped[self.completedRow])-1,1):
-                    del self.flipped[self.completedRow][-1]    
+                del self.flipped[self.completedRow][last:]    
             self.FlipCard()
         except: 
             print("INVALID -- MOVE TO STOCK")
+
     def CheckStock(self):
-        if len(self.stock)==8:
-            return True
-        else:
-            return False      
+        return len(self.stock)==8
+
     def GetPossibleMoves(self):
-        """
-        -go through the entire flipped board
-        -start from the top(displayed as bottom)of the list and is actually the end of the list
-        """
         self.possibleMoves=[]
         for x in range(len(self.flipped)):
             if len(self.flipped[x]) == 0:
                 continue
-            elif len(self.flipped[x]) == 1:
-                #MAKE SOME MAGIC
-                for y in range(len(self.flipped)):
-                    self.currentList=[]
-                    if y == x:
-                        continue
-                    else:
-                        self.currentList.append(x)
-                        self.currentList.append(0)
-                        self.currentList.append(y)
-                        self.possibleMoves.append(self.currentList)
-            else:              
+            else:
                 for y in range(len(self.flipped[x])-1,-1,-1):
                     for z in range(len(self.flipped)):
-                        self.currentList=[]
-                        self.currentList.append(x)
-                        self.currentList.append(y)
-                        self.currentList.append(z)
-                        self.possibleMoves.append(self.currentList)
+                        if z == x:
+                            continue
+                        else:
+                            self.currentList=[]
+                            self.currentList.append(x)
+                            self.currentList.append(y)
+                            self.currentList.append(z)
+                            self.possibleMoves.append(self.currentList)                
+    
     def GetValidMoves(self):
         self.possibleValidMoves=[]
         for x in range(len(self.possibleMoves)):
             startX=self.possibleMoves[x][0]
             startY=self.possibleMoves[x][1]
             finishX=self.possibleMoves[x][2]
-            if self.CheckMoveValidity(startX,startY,finishX) and self.CheckCoordinateValidity(startX,startY,finishX):
-                self.possibleValidMoves.append(self.possibleMoves[x])    
+            if self.ValidMove(startX, startY, finishX):
+                self.possibleValidMoves.append(self.possibleMoves[x])  
+
+    def ValidMove(self, startX, startY, finishX):
+        return self.CheckMoveValidity(startX,startY,finishX) and self.CheckCoordinateValidity(startX,startY,finishX)
+
 
 
 def minimax(game, depth):
@@ -278,7 +273,7 @@ def list_mean(n):
         return False
     return float(summing/count)  
 highestDepth = 5
-gamesPlayed= 5
+gamesPlayed= 20
 for y in range(1,highestDepth+1,1):
     outcomes=[]
     gameElapsedTime = []
@@ -319,6 +314,8 @@ for y in range(1,highestDepth+1,1):
             startX = bestMove[0]
             startY = bestMove[1]
             finishX = bestMove[2]
+            if startX == -100 or startY == -100 or finishX == -100:
+                completeMove=False
             #if there are no available moves or the card youre moving from is the same as youre moving to
             #if the same move is made twice in 3 turns, deal the foundation
             moves.append(bestMove)
@@ -328,7 +325,7 @@ for y in range(1,highestDepth+1,1):
                 dups = {tuple(x) for x in moves if moves.count(x)>1}
                 if len(dups) >0:
                     if len(g.foundation) == 0:
-                        #print("Loss")
+                        print("Loss")
                         #print("Completed stacks: " + str(len(g.stock)))
                         #print("Moves made: " + str(counter))
                         outcomes.append("L")
@@ -350,7 +347,7 @@ for y in range(1,highestDepth+1,1):
             if len(g.stock) == 6 or len(g.stock) == 7:
                 #for x in range(10):
                     #print()
-                #print("WOOO YOU WON")
+                print("WOOO YOU WON")
                 completedStacks.append(len(g.stock))
                 movesMade.append(counter)
                 outcomes.append("W")
