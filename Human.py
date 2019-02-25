@@ -263,5 +263,9 @@ while True:
             break
     except:
         print("INVALID INPUT")
+<<<<<<< HEAD
 print("Congratulations on this amazing achievement. Not many make it to this point")
 print("Total moves: " + str(counter))
+=======
+print("Congratulations on this amazing achievement. Not many make it to this point") 
+>>>>>>> c69800a76544d49bcd25b8c7acd45adaad00de22
