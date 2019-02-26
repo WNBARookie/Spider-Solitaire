@@ -224,8 +224,6 @@ class Game:
     def ValidMove(self, startX, startY, finishX):
         return self.CheckMoveValidity(startX,startY,finishX) and self.CheckCoordinateValidity(startX,startY,finishX)
 
-
-
 def minimax(game, depth):
     c=1
     if depth == 0 or len(game.stock) ==6 or len(game.stock) ==7:
